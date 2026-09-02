@@ -8,6 +8,14 @@
 const BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8100';
 const TOKEN_KEY = 'chominjungum.token';
 
+/**
+ * 앱 토큰 전용 헤더.
+ *
+ * 게이트웨이(nginx)가 외부 요청에 HTTP Basic 을 요구하면 브라우저가 `Authorization` 을
+ * Basic 으로 채운다. 앱 토큰까지 같은 헤더에 실으면 하나가 덮여 인증이 깨지므로 분리한다.
+ */
+const TOKEN_HEADER = 'X-Auth-Token';
+
 export interface Session {
   token: string;
   role: 'TEACHER' | 'STUDENT';
@@ -44,7 +52,7 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
     method,
     headers: {
       'Content-Type': 'application/json',
-      ...(session ? { Authorization: `Bearer ${session.token}` } : {}),
+      ...(session ? { [TOKEN_HEADER]: session.token } : {}),
     },
     ...(body === undefined ? {} : { body: JSON.stringify(body) }),
   });
@@ -174,7 +182,7 @@ export interface StudentReport {
 export async function downloadClassroomCsv(classroomId: string, filename: string): Promise<void> {
   const session = loadSession();
   const res = await fetch(`${BASE}/api/reports/classroom/${classroomId}/csv`, {
-    headers: session ? { Authorization: `Bearer ${session.token}` } : {},
+    headers: session ? { [TOKEN_HEADER]: session.token } : {},
   });
   if (!res.ok) throw new ApiError(res.status, '성적표를 내려받지 못했습니다.');
 
