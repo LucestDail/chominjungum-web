@@ -107,3 +107,11 @@ jammin에서 가져와 **바꾸면 안 되는 것**:
 - 자모 가리기 4모드 (자음 / 초성 / 중성 / 종성)
 
 상세는 [PLAN.md §2](PLAN.md).
+
+### 게이트웨이 뒤에 배포할 때
+
+서브패스로 서빙하려면 base 를 주고 빌드한다. API 도 같은 origin 상대경로가 되어 CORS 설정이 필요 없다.
+
+```bash
+VITE_BASE=/chominjungum/ VITE_API_BASE=/chominjungum npm run build
+```
