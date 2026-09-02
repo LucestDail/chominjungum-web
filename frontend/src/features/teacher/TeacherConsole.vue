@@ -17,6 +17,8 @@ import {
   type UnassignedDevice,
 } from '../../api/client';
 
+import ClassroomReportPanel from './ClassroomReportPanel.vue';
+
 const session = ref<Session | null>(loadSession());
 const message = ref<{ tone: 'ok' | 'warn'; text: string } | null>(null);
 
@@ -311,6 +313,9 @@ onMounted(() => {
             <li v-if="assignments.length === 0" class="empty">과제가 없습니다.</li>
           </ul>
         </section>
+
+        <!-- 성적 -->
+        <ClassroomReportPanel :classroom-id="selectedClassroom.id" />
       </template>
     </template>
   </div>

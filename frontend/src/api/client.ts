@@ -118,6 +118,75 @@ export interface ExamStart {
   items: ExamItem[];
 }
 
+export interface StudentRow {
+  studentId: string;
+  displayName: string;
+  attemptCount: number;
+  averagePercent: number;
+  perfectCount: number;
+}
+
+export interface ItemRow {
+  itemId: string;
+  expectedText: string;
+  attemptCount: number;
+  averagePercent: number;
+}
+
+export interface ClassroomReport {
+  classroomId: string;
+  classroomName: string;
+  studentCount: number;
+  attemptCount: number;
+  averagePercent: number;
+  students: StudentRow[];
+  items: ItemRow[];
+  unassignedDeviceCount: number;
+}
+
+export interface WeakJamo {
+  kind: 'cho' | 'jung' | 'jong';
+  code: number;
+  label: string;
+  missCount: number;
+}
+
+export interface AttemptRow {
+  attemptId: string;
+  expectedText: string;
+  rawAnswer: string;
+  correctCount: number;
+  totalCount: number;
+  scorePercent: number;
+  submittedAtMs: number;
+}
+
+export interface StudentReport {
+  studentId: string;
+  displayName: string;
+  attemptCount: number;
+  averagePercent: number;
+  attempts: AttemptRow[];
+  weakJamos: WeakJamo[];
+}
+
+/** 성적표 CSV — 토큰이 필요하므로 fetch 로 받아 파일로 저장한다. */
+export async function downloadClassroomCsv(classroomId: string, filename: string): Promise<void> {
+  const session = loadSession();
+  const res = await fetch(`${BASE}/api/reports/classroom/${classroomId}/csv`, {
+    headers: session ? { Authorization: `Bearer ${session.token}` } : {},
+  });
+  if (!res.ok) throw new ApiError(res.status, '성적표를 내려받지 못했습니다.');
+
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export interface GlyphMatch {
   index: number;
   correct: boolean;
