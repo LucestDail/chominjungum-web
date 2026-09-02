@@ -66,9 +66,35 @@ Dart 구현도 같은 파일을 본다:
 cd ../chominjungum/packages/hangul_core && dart test    # golden_test.dart 포함
 ```
 
-### 아직 없는 것
+### 종합 서버
 
-`backend/`(Spring Boot)는 Phase 2에서 만든다. `docker-compose.yml`도 그때 함께 추가한다.
+```bash
+docker compose up -d                       # PostgreSQL (localhost:55432)
+cd backend && mvn spring-boot:run          # http://localhost:8100
+cd backend && mvn test                     # 49 tests (골든·채점·통합 e2e)
+```
+
+서버 테스트는 **실제 PostgreSQL 이 떠 있어야** 돈다(`docker compose up -d` 먼저).
+운영에서는 `JWT_SECRET`·`DB_*`·`CORS_ORIGINS` 를 환경변수로 반드시 덮어쓴다.
+
+### 화면 세 개
+
+| 탭 | 로그인 | 하는 일 |
+|---|---|---|
+| 학습지 | 불필요 | 문항 입력 → 자모 가리기 → 인쇄. **서버 없이 완결** |
+| 교사 콘솔 | 교사 계정 | 학급·참여코드, 명단, 문항, 과제 열기/닫기, 성적·취약 자모, 기기 매핑 |
+| 받아쓰기 참여 | 참여코드 | 듣고 쓰기 → 제출 → 서버 재채점 결과 확인 |
+
+### 전체 테스트
+
+```bash
+npm test                                   # TS 69 (hangul-core 55 + frontend 14)
+cd backend && mvn test                     # Java 49
+cd ../../chominjungum && \
+  (cd packages/hangul_core && dart test) && \
+  (cd packages/sync_protocol && dart test) && \
+  (cd apps/chominjungum && flutter test)   # Dart/Flutter 54
+```
 
 ## 준용 규칙 (요약)
 
