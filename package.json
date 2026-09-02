@@ -1,0 +1,17 @@
+{
+  "name": "chominjungum-web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "초민정음 웹 레이어 + 종합 서버 (모노레포 루트)",
+  "workspaces": [
+    "packages/*",
+    "frontend"
+  ],
+  "scripts": {
+    "test": "npm run test --workspace @chominjungum/hangul-core",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "build": "npm run build --workspace chominjungum-frontend",
+    "dev": "npm run dev --workspace chominjungum-frontend",
+    "golden:collect": "node golden/collect.mjs > golden/hangul-split.json"
+  }
+}

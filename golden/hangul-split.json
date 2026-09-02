@@ -1,0 +1,944 @@
+{
+  "version": 1,
+  "source": "jammin HangulUtil (read-only reference)",
+  "collectedAt": "2026-09-02",
+  "note": "손으로 편집하지 말 것. 반드시 jammin 실제 응답으로 다시 채집한다.",
+  "cases": [
+    {
+      "input": "안녕하세요",
+      "expected": [
+        {
+          "emptyJongsung": false,
+          "jungsung": "ᅡ",
+          "chosung": "ᄋ",
+          "jungCode": 4449,
+          "choCode": 4363,
+          "errorFlag": false,
+          "jongCode": 4523,
+          "specialFlag": false,
+          "word": "안",
+          "jongsung": "ᆫ"
+        },
+        {
+          "emptyJongsung": false,
+          "jungsung": "ᅧ",
+          "chosung": "ᄂ",
+          "jungCode": 4455,
+          "choCode": 4354,
+          "errorFlag": false,
+          "jongCode": 4540,
+          "specialFlag": false,
+          "word": "녕",
+          "jongsung": "ᆼ"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅡ",
+          "chosung": "ᄒ",
+          "jungCode": 4449,
+          "choCode": 4370,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "하"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅦ",
+          "chosung": "ᄉ",
+          "jungCode": 4454,
+          "choCode": 4361,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "세"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅭ",
+          "chosung": "ᄋ",
+          "jungCode": 4461,
+          "choCode": 4363,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "요"
+        }
+      ]
+    },
+    {
+      "input": "강아지와고양이",
+      "expected": [
+        {
+          "emptyJongsung": false,
+          "jungsung": "ᅡ",
+          "chosung": "ᄀ",
+          "jungCode": 4449,
+          "choCode": 4352,
+          "errorFlag": false,
+          "jongCode": 4540,
+          "specialFlag": false,
+          "word": "강",
+          "jongsung": "ᆼ"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅡ",
+          "chosung": "ᄋ",
+          "jungCode": 4449,
+          "choCode": 4363,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "아"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅵ",
+          "chosung": "ᄌ",
+          "jungCode": 4469,
+          "choCode": 4364,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "지"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅪ",
+          "chosung": "ᄋ",
+          "jungCode": 4458,
+          "choCode": 4363,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "와"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅩ",
+          "chosung": "ᄀ",
+          "jungCode": 4457,
+          "choCode": 4352,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "고"
+        },
+        {
+          "emptyJongsung": false,
+          "jungsung": "ᅣ",
+          "chosung": "ᄋ",
+          "jungCode": 4451,
+          "choCode": 4363,
+          "errorFlag": false,
+          "jongCode": 4540,
+          "specialFlag": false,
+          "word": "양",
+          "jongsung": "ᆼ"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅵ",
+          "chosung": "ᄋ",
+          "jungCode": 4469,
+          "choCode": 4363,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "이"
+        }
+      ]
+    },
+    {
+      "input": "가",
+      "expected": [
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅡ",
+          "chosung": "ᄀ",
+          "jungCode": 4449,
+          "choCode": 4352,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "가"
+        }
+      ]
+    },
+    {
+      "input": "간",
+      "expected": [
+        {
+          "emptyJongsung": false,
+          "jungsung": "ᅡ",
+          "chosung": "ᄀ",
+          "jungCode": 4449,
+          "choCode": 4352,
+          "errorFlag": false,
+          "jongCode": 4523,
+          "specialFlag": false,
+          "word": "간",
+          "jongsung": "ᆫ"
+        }
+      ]
+    },
+    {
+      "input": "값",
+      "expected": [
+        {
+          "emptyJongsung": false,
+          "jungsung": "ᅡ",
+          "chosung": "ᄀ",
+          "jungCode": 4449,
+          "choCode": 4352,
+          "errorFlag": false,
+          "jongCode": 4537,
+          "specialFlag": false,
+          "word": "값",
+          "jongsung": "ᆹ"
+        }
+      ]
+    },
+    {
+      "input": "없다",
+      "expected": [
+        {
+          "emptyJongsung": false,
+          "jungsung": "ᅥ",
+          "chosung": "ᄋ",
+          "jungCode": 4453,
+          "choCode": 4363,
+          "errorFlag": false,
+          "jongCode": 4537,
+          "specialFlag": false,
+          "word": "없",
+          "jongsung": "ᆹ"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅡ",
+          "chosung": "ᄃ",
+          "jungCode": 4449,
+          "choCode": 4355,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "다"
+        }
+      ]
+    },
+    {
+      "input": "까치",
+      "expected": [
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅡ",
+          "chosung": "ᄁ",
+          "jungCode": 4449,
+          "choCode": 4353,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "까"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅵ",
+          "chosung": "ᄎ",
+          "jungCode": 4469,
+          "choCode": 4366,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "치"
+        }
+      ]
+    },
+    {
+      "input": "의외의",
+      "expected": [
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅴ",
+          "chosung": "ᄋ",
+          "jungCode": 4468,
+          "choCode": 4363,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "의"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅬ",
+          "chosung": "ᄋ",
+          "jungCode": 4460,
+          "choCode": 4363,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "외"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅴ",
+          "chosung": "ᄋ",
+          "jungCode": 4468,
+          "choCode": 4363,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "의"
+        }
+      ]
+    },
+    {
+      "input": "안녕. 잘 가!",
+      "expected": [
+        {
+          "emptyJongsung": false,
+          "jungsung": "ᅡ",
+          "chosung": "ᄋ",
+          "jungCode": 4449,
+          "choCode": 4363,
+          "errorFlag": false,
+          "jongCode": 4523,
+          "specialFlag": false,
+          "word": "안",
+          "jongsung": "ᆫ"
+        },
+        {
+          "emptyJongsung": false,
+          "jungsung": "ᅧ",
+          "chosung": "ᄂ",
+          "jungCode": 4455,
+          "choCode": 4354,
+          "errorFlag": false,
+          "jongCode": 4540,
+          "specialFlag": false,
+          "word": "녕",
+          "jongsung": "ᆼ"
+        },
+        {
+          "specialTypeCode": 46,
+          "emptyJongsung": true,
+          "errorFlag": false,
+          "specialType": ".",
+          "specialFlag": true
+        },
+        {
+          "specialTypeCode": 32,
+          "emptyJongsung": true,
+          "errorFlag": false,
+          "specialType": " ",
+          "specialFlag": true
+        },
+        {
+          "emptyJongsung": false,
+          "jungsung": "ᅡ",
+          "chosung": "ᄌ",
+          "jungCode": 4449,
+          "choCode": 4364,
+          "errorFlag": false,
+          "jongCode": 4527,
+          "specialFlag": false,
+          "word": "잘",
+          "jongsung": "ᆯ"
+        },
+        {
+          "specialTypeCode": 32,
+          "emptyJongsung": true,
+          "errorFlag": false,
+          "specialType": " ",
+          "specialFlag": true
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅡ",
+          "chosung": "ᄀ",
+          "jungCode": 4449,
+          "choCode": 4352,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "가"
+        },
+        {
+          "specialTypeCode": 33,
+          "emptyJongsung": true,
+          "errorFlag": false,
+          "specialType": "!",
+          "specialFlag": true
+        }
+      ]
+    },
+    {
+      "input": "누구, 어디?",
+      "expected": [
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅮ",
+          "chosung": "ᄂ",
+          "jungCode": 4462,
+          "choCode": 4354,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "누"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅮ",
+          "chosung": "ᄀ",
+          "jungCode": 4462,
+          "choCode": 4352,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "구"
+        },
+        {
+          "specialTypeCode": 44,
+          "emptyJongsung": true,
+          "errorFlag": false,
+          "specialType": ",",
+          "specialFlag": true
+        },
+        {
+          "specialTypeCode": 32,
+          "emptyJongsung": true,
+          "errorFlag": false,
+          "specialType": " ",
+          "specialFlag": true
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅥ",
+          "chosung": "ᄋ",
+          "jungCode": 4453,
+          "choCode": 4363,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "어"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅵ",
+          "chosung": "ᄃ",
+          "jungCode": 4469,
+          "choCode": 4355,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "디"
+        },
+        {
+          "specialTypeCode": 63,
+          "emptyJongsung": true,
+          "errorFlag": false,
+          "specialType": "?",
+          "specialFlag": true
+        }
+      ]
+    },
+    {
+      "input": "1학년 2반",
+      "expected": [
+        {
+          "specialTypeCode": 49,
+          "emptyJongsung": true,
+          "errorFlag": false,
+          "specialType": "1",
+          "specialFlag": true
+        },
+        {
+          "emptyJongsung": false,
+          "jungsung": "ᅡ",
+          "chosung": "ᄒ",
+          "jungCode": 4449,
+          "choCode": 4370,
+          "errorFlag": false,
+          "jongCode": 4520,
+          "specialFlag": false,
+          "word": "학",
+          "jongsung": "ᆨ"
+        },
+        {
+          "emptyJongsung": false,
+          "jungsung": "ᅧ",
+          "chosung": "ᄂ",
+          "jungCode": 4455,
+          "choCode": 4354,
+          "errorFlag": false,
+          "jongCode": 4523,
+          "specialFlag": false,
+          "word": "년",
+          "jongsung": "ᆫ"
+        },
+        {
+          "specialTypeCode": 32,
+          "emptyJongsung": true,
+          "errorFlag": false,
+          "specialType": " ",
+          "specialFlag": true
+        },
+        {
+          "specialTypeCode": 50,
+          "emptyJongsung": true,
+          "errorFlag": false,
+          "specialType": "2",
+          "specialFlag": true
+        },
+        {
+          "emptyJongsung": false,
+          "jungsung": "ᅡ",
+          "chosung": "ᄇ",
+          "jungCode": 4449,
+          "choCode": 4359,
+          "errorFlag": false,
+          "jongCode": 4523,
+          "specialFlag": false,
+          "word": "반",
+          "jongsung": "ᆫ"
+        }
+      ]
+    },
+    {
+      "input": "0123456789",
+      "expected": [
+        {
+          "specialTypeCode": 48,
+          "emptyJongsung": true,
+          "errorFlag": false,
+          "specialType": "0",
+          "specialFlag": true
+        },
+        {
+          "specialTypeCode": 49,
+          "emptyJongsung": true,
+          "errorFlag": false,
+          "specialType": "1",
+          "specialFlag": true
+        },
+        {
+          "specialTypeCode": 50,
+          "emptyJongsung": true,
+          "errorFlag": false,
+          "specialType": "2",
+          "specialFlag": true
+        },
+        {
+          "specialTypeCode": 51,
+          "emptyJongsung": true,
+          "errorFlag": false,
+          "specialType": "3",
+          "specialFlag": true
+        },
+        {
+          "specialTypeCode": 52,
+          "emptyJongsung": true,
+          "errorFlag": false,
+          "specialType": "4",
+          "specialFlag": true
+        },
+        {
+          "specialTypeCode": 53,
+          "emptyJongsung": true,
+          "errorFlag": false,
+          "specialType": "5",
+          "specialFlag": true
+        },
+        {
+          "specialTypeCode": 54,
+          "emptyJongsung": true,
+          "errorFlag": false,
+          "specialType": "6",
+          "specialFlag": true
+        },
+        {
+          "specialTypeCode": 55,
+          "emptyJongsung": true,
+          "errorFlag": false,
+          "specialType": "7",
+          "specialFlag": true
+        },
+        {
+          "specialTypeCode": 56,
+          "emptyJongsung": true,
+          "errorFlag": false,
+          "specialType": "8",
+          "specialFlag": true
+        },
+        {
+          "specialTypeCode": 57,
+          "emptyJongsung": true,
+          "errorFlag": false,
+          "specialType": "9",
+          "specialFlag": true
+        }
+      ]
+    },
+    {
+      "input": " ",
+      "expected": [
+        {
+          "specialTypeCode": 32,
+          "emptyJongsung": true,
+          "errorFlag": false,
+          "specialType": " ",
+          "specialFlag": true
+        }
+      ]
+    },
+    {
+      "input": "가나다라마바사아자차카타파하거너",
+      "expected": [
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅡ",
+          "chosung": "ᄀ",
+          "jungCode": 4449,
+          "choCode": 4352,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "가"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅡ",
+          "chosung": "ᄂ",
+          "jungCode": 4449,
+          "choCode": 4354,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "나"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅡ",
+          "chosung": "ᄃ",
+          "jungCode": 4449,
+          "choCode": 4355,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "다"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅡ",
+          "chosung": "ᄅ",
+          "jungCode": 4449,
+          "choCode": 4357,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "라"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅡ",
+          "chosung": "ᄆ",
+          "jungCode": 4449,
+          "choCode": 4358,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "마"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅡ",
+          "chosung": "ᄇ",
+          "jungCode": 4449,
+          "choCode": 4359,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "바"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅡ",
+          "chosung": "ᄉ",
+          "jungCode": 4449,
+          "choCode": 4361,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "사"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅡ",
+          "chosung": "ᄋ",
+          "jungCode": 4449,
+          "choCode": 4363,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "아"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅡ",
+          "chosung": "ᄌ",
+          "jungCode": 4449,
+          "choCode": 4364,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "자"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅡ",
+          "chosung": "ᄎ",
+          "jungCode": 4449,
+          "choCode": 4366,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "차"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅡ",
+          "chosung": "ᄏ",
+          "jungCode": 4449,
+          "choCode": 4367,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "카"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅡ",
+          "chosung": "ᄐ",
+          "jungCode": 4449,
+          "choCode": 4368,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "타"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅡ",
+          "chosung": "ᄑ",
+          "jungCode": 4449,
+          "choCode": 4369,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "파"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅡ",
+          "chosung": "ᄒ",
+          "jungCode": 4449,
+          "choCode": 4370,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "하"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅥ",
+          "chosung": "ᄀ",
+          "jungCode": 4453,
+          "choCode": 4352,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "거"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅥ",
+          "chosung": "ᄂ",
+          "jungCode": 4453,
+          "choCode": 4354,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "너"
+        }
+      ]
+    },
+    {
+      "input": "가나다라마바사아자차카타파하거너더",
+      "expected": [
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅡ",
+          "chosung": "ᄀ",
+          "jungCode": 4449,
+          "choCode": 4352,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "가"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅡ",
+          "chosung": "ᄂ",
+          "jungCode": 4449,
+          "choCode": 4354,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "나"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅡ",
+          "chosung": "ᄃ",
+          "jungCode": 4449,
+          "choCode": 4355,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "다"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅡ",
+          "chosung": "ᄅ",
+          "jungCode": 4449,
+          "choCode": 4357,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "라"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅡ",
+          "chosung": "ᄆ",
+          "jungCode": 4449,
+          "choCode": 4358,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "마"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅡ",
+          "chosung": "ᄇ",
+          "jungCode": 4449,
+          "choCode": 4359,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "바"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅡ",
+          "chosung": "ᄉ",
+          "jungCode": 4449,
+          "choCode": 4361,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "사"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅡ",
+          "chosung": "ᄋ",
+          "jungCode": 4449,
+          "choCode": 4363,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "아"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅡ",
+          "chosung": "ᄌ",
+          "jungCode": 4449,
+          "choCode": 4364,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "자"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅡ",
+          "chosung": "ᄎ",
+          "jungCode": 4449,
+          "choCode": 4366,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "차"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅡ",
+          "chosung": "ᄏ",
+          "jungCode": 4449,
+          "choCode": 4367,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "카"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅡ",
+          "chosung": "ᄐ",
+          "jungCode": 4449,
+          "choCode": 4368,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "타"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅡ",
+          "chosung": "ᄑ",
+          "jungCode": 4449,
+          "choCode": 4369,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "파"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅡ",
+          "chosung": "ᄒ",
+          "jungCode": 4449,
+          "choCode": 4370,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "하"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅥ",
+          "chosung": "ᄀ",
+          "jungCode": 4453,
+          "choCode": 4352,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "거"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅥ",
+          "chosung": "ᄂ",
+          "jungCode": 4453,
+          "choCode": 4354,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "너"
+        },
+        {
+          "emptyJongsung": true,
+          "jungsung": "ᅥ",
+          "chosung": "ᄃ",
+          "jungCode": 4453,
+          "choCode": 4355,
+          "errorFlag": false,
+          "specialFlag": false,
+          "word": "더"
+        }
+      ]
+    },
+    {
+      "input": "Hello",
+      "expected": []
+    },
+    {
+      "input": "ㄱㄴㄷ",
+      "expected": []
+    },
+    {
+      "input": "ㅏㅑㅓ",
+      "expected": []
+    },
+    {
+      "input": "漢字",
+      "expected": []
+    },
+    {
+      "input": "한글English",
+      "expected": []
+    },
+    {
+      "input": "이모지🙂",
+      "expected": []
+    },
+    {
+      "input": "",
+      "expected": []
+    }
+  ]
+}

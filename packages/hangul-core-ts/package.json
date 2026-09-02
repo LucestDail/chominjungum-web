@@ -1,0 +1,22 @@
+{
+  "name": "@chominjungum/hangul-core",
+  "version": "0.1.0",
+  "private": true,
+  "description": "jammin 자모 분해·채점 로직의 TypeScript 이식본 (골든 벡터로 Java·Dart 구현과 동치성 보증)",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.4"
+  }
+}
