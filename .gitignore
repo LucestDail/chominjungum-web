@@ -9,3 +9,6 @@ backend/target/
 .env
 .env.local
 .DS_Store
+
+# Java
+backend/.mvn/

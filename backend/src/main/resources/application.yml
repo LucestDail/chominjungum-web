@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: chominjungum-server
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:55432/chominjungum}
+    username: ${DB_USER:chominjungum}
+    password: ${DB_PASSWORD:chominjungum}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+server:
+  port: ${SERVER_PORT:8100}
+
+chominjungum:
+  jwt:
+    # 운영에서는 반드시 환경변수로 덮어쓴다. 32바이트 이상.
+    secret: ${JWT_SECRET:dev-only-secret-key-please-override-in-production}
+    teacher-ttl: PT12H
+    student-ttl: PT4H
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:5180}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
