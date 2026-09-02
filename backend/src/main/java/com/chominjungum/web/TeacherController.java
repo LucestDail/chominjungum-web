@@ -82,6 +82,13 @@ public class TeacherController {
         return new StudentResponse(s.getId(), s.getDisplayName(), s.getStudentNo());
     }
 
+    /** 아직 명단에 연결되지 않은 기기 — 업싱크 후 교사가 처리할 대기열. */
+    @GetMapping("/classrooms/{classroomId}/unassigned-devices")
+    public List<Dtos.UnassignedDevice> unassignedDevices(
+            @AuthenticationPrincipal AuthPrincipal me, @PathVariable UUID classroomId) {
+        return classroomService.unassignedDevices(me.id(), classroomId);
+    }
+
     /** 교실 LAN 제출의 익명 기기를 명단에 연결하고, 그 기기의 과거 제출을 소급 매핑한다. */
     @PostMapping("/classrooms/{classroomId}/devices")
     public BindDeviceResponse bindDevice(

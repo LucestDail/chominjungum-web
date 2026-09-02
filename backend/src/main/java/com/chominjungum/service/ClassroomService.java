@@ -3,10 +3,12 @@ package com.chominjungum.service;
 import com.chominjungum.domain.Classroom;
 import com.chominjungum.domain.Student;
 import com.chominjungum.domain.StudentDevice;
+import com.chominjungum.repo.AttemptRepository;
 import com.chominjungum.repo.ClassroomRepository;
 import com.chominjungum.repo.StudentDeviceRepository;
 import com.chominjungum.repo.StudentRepository;
 import com.chominjungum.web.ApiException;
+import com.chominjungum.web.Dtos;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
@@ -19,16 +21,19 @@ public class ClassroomService {
     private final ClassroomRepository classrooms;
     private final StudentRepository students;
     private final StudentDeviceRepository devices;
+    private final AttemptRepository attempts;
     private final AuthService authService;
 
     public ClassroomService(
             ClassroomRepository classrooms,
             StudentRepository students,
             StudentDeviceRepository devices,
+            AttemptRepository attempts,
             AuthService authService) {
         this.classrooms = classrooms;
         this.students = students;
         this.devices = devices;
+        this.attempts = attempts;
         this.authService = authService;
     }
 
@@ -65,6 +70,14 @@ public class ClassroomService {
             throw new ApiException(HttpStatus.BAD_REQUEST, "학생 이름을 입력하세요.");
         }
         return students.save(new Student(classroomId, name, studentNo));
+    }
+
+    /** 업싱크로 들어왔지만 아직 학생과 연결되지 않은 기기들. */
+    public List<Dtos.UnassignedDevice> unassignedDevices(UUID teacherId, UUID classroomId) {
+        getOwned(teacherId, classroomId);
+        return attempts.findUnassignedDevices(classroomId).stream()
+                .map(row -> new Dtos.UnassignedDevice((String) row[0], ((Number) row[1]).longValue()))
+                .toList();
     }
 
     /**

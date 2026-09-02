@@ -49,6 +49,10 @@ public final class Dtos {
     public record BindDeviceResponse(String deviceBindingId, UUID studentId, int backfilled) {
     }
 
+    /** 명단 연결이 안 된 기기와 그 기기가 낸 제출 수. */
+    public record UnassignedDevice(String deviceBindingId, long attemptCount) {
+    }
+
     // ── 문항 ────────────────────────────────────────────────
     public record ItemRequest(@NotBlank String expectedText, Integer grade, String unit) {
     }

@@ -84,6 +84,11 @@ export interface Student {
   studentNo: number | null;
 }
 
+export interface UnassignedDevice {
+  deviceBindingId: string;
+  attemptCount: number;
+}
+
 export interface Item {
   id: string;
   expectedText: string;

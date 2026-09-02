@@ -14,6 +14,7 @@ import {
   type Item,
   type Session,
   type Student,
+  type UnassignedDevice,
 } from '../../api/client';
 
 const session = ref<Session | null>(loadSession());
@@ -29,6 +30,8 @@ const displayName = ref('');
 const classrooms = ref<Classroom[]>([]);
 const selectedClassroomId = ref<string | null>(null);
 const roster = ref<Student[]>([]);
+const unassigned = ref<UnassignedDevice[]>([]);
+const bindTarget = ref<Record<string, string>>({});
 const items = ref<Item[]>([]);
 const assignments = ref<AssignmentSummary[]>([]);
 
@@ -92,12 +95,32 @@ async function loadAll() {
 
 async function selectClassroom(id: string) {
   selectedClassroomId.value = id;
-  const [r, a] = await Promise.all([
+  const [r, a, u] = await Promise.all([
     guard(() => api.get<Student[]>(`/api/classrooms/${id}/students`)),
     guard(() => api.get<AssignmentSummary[]>(`/api/classrooms/${id}/assignments`)),
+    guard(() => api.get<UnassignedDevice[]>(`/api/classrooms/${id}/unassigned-devices`)),
   ]);
   if (r) roster.value = r;
   if (a) assignments.value = a;
+  if (u) unassigned.value = u;
+}
+
+/** 교실 LAN 제출의 익명 기기를 학생과 연결한다. 과거 제출도 소급해서 붙는다. */
+async function bindDevice(deviceBindingId: string) {
+  const studentId = bindTarget.value[deviceBindingId];
+  if (!studentId || !selectedClassroomId.value) {
+    notify('warn', '연결할 학생을 고르세요.');
+    return;
+  }
+  const res = await guard(() =>
+    api.post<{ backfilled: number }>(`/api/classrooms/${selectedClassroomId.value}/devices`, {
+      deviceBindingId,
+      studentId,
+    }),
+  );
+  if (!res) return;
+  notify('ok', `기기를 연결했습니다. 이전 제출 ${res.backfilled}건이 성적에 반영되었습니다.`);
+  await selectClassroom(selectedClassroomId.value);
 }
 
 async function createClassroom() {
@@ -226,6 +249,25 @@ onMounted(() => {
           <ul class="list">
             <li v-for="s in roster" :key="s.id">{{ s.displayName }}</li>
             <li v-if="roster.length === 0" class="empty">아직 학생이 없습니다.</li>
+          </ul>
+        </section>
+
+        <!-- 미배정 기기 -->
+        <section v-if="unassigned.length > 0" class="card">
+          <h2>명단 연결이 필요한 기기 ({{ unassigned.length }})</h2>
+          <p class="hint">
+            교실에서 올라온 제출입니다. 어느 학생의 기기인지 연결하면 이전 제출까지 성적에 반영됩니다.
+          </p>
+          <ul class="list">
+            <li v-for="d in unassigned" :key="d.deviceBindingId" class="assignment">
+              <code>{{ d.deviceBindingId.slice(0, 8) }}…</code>
+              <span class="dim">{{ d.attemptCount }}건</span>
+              <select v-model="bindTarget[d.deviceBindingId]">
+                <option value="">학생 선택</option>
+                <option v-for="s in roster" :key="s.id" :value="s.id">{{ s.displayName }}</option>
+              </select>
+              <button @click="bindDevice(d.deviceBindingId)">연결</button>
+            </li>
           </ul>
         </section>
 
