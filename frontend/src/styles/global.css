@@ -1,0 +1,39 @@
+/* 전역 리셋 + 인쇄 규격 */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: #fff;
+}
+
+img {
+  max-width: 100%;
+}
+
+/*
+ * 인쇄: jammin 은 `offset().top / 880` 으로 페이지를 세었는데,
+ * 브라우저 확대/여백에 따라 어긋난다. A4 규격을 직접 지정하고
+ * 문항 단위 break 규칙(WorksheetItemRow)에 맡긴다.
+ */
+@page {
+  size: A4 portrait;
+  margin: 14mm 12mm;
+}
+
+@media print {
+  html,
+  body {
+    background: #fff;
+  }
+
+  /* 배경 원고지 칸이 인쇄에서 빠지지 않도록 */
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

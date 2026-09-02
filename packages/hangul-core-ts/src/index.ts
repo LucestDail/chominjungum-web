@@ -16,6 +16,13 @@ export {
 } from './dictation-compare.js';
 
 export {
+  JAMO_GROUPS,
+  optionsOf,
+  type JamoGroup,
+  type JamoOption,
+} from './jamo-table.js';
+
+export {
   allCodesForMode,
   changeMode,
   EMPTY_HIDE_RULE,

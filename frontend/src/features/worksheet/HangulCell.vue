@@ -14,11 +14,17 @@ const props = withDefaults(
     glyph: HangulGlyph;
     profileKey?: ProfileKey;
     hideRule?: HideRule | null;
+    /**
+     * 글자 크기 배율. jammin `syncFontConfig` 는 모든 글리프 높이를 같은 값으로 덮어써
+     * 초/중/종성 비율이 무너졌는데, 여기서는 **프로필 비율을 유지한 채** 확대·축소한다.
+     */
+    scale?: number;
   }>(),
-  { profileKey: 'editor', hideRule: null },
+  { profileKey: 'editor', hideRule: null, scale: 1 },
 );
 
 const profile = computed(() => PROFILES[props.profileKey]);
+const px = (v: number) => `${v * props.scale}px`;
 
 const hidden = computed(() =>
   props.hideRule
@@ -33,17 +39,17 @@ const src = (code: number) => `hangul/${code}.svg`;
   <div
     class="hangul-set"
     :style="{
-      width: `${profile.cellWidth}px`,
-      height: `${profile.cellHeight}px`,
+      width: px(profile.cellWidth),
+      height: px(profile.cellHeight),
     }"
   >
     <img
       class="hangul-background"
       :src="profile.background.src"
       :style="{
-        height: `${profile.background.height}px`,
-        top: `${profile.background.top}px`,
-        left: `${profile.background.left}px`,
+        height: px(profile.background.height),
+        top: px(profile.background.top),
+        left: px(profile.background.left),
       }"
       alt=""
     />
@@ -52,7 +58,11 @@ const src = (code: number) => `hangul/${code}.svg`;
       <img
         class="glyph special"
         :src="src(glyph.specialTypeCode!)"
-        :style="{ height: `${specialHeight(glyph.specialTypeCode!, profile)}px`, top: '2px', left: '2px' }"
+        :style="{
+          height: px(specialHeight(glyph.specialTypeCode!, profile)),
+          top: px(2),
+          left: px(2),
+        }"
         :alt="glyph.specialType"
       />
     </template>
@@ -63,7 +73,7 @@ const src = (code: number) => `hangul/${code}.svg`;
         class="glyph cho"
         :class="{ hidebox: hidden.cho }"
         :src="src(glyph.choCode)"
-        :style="{ height: `${profile.cho.height}px`, top: `${profile.cho.top}px`, zIndex: profile.cho.zIndex }"
+        :style="{ height: px(profile.cho.height), top: px(profile.cho.top), zIndex: profile.cho.zIndex }"
         :alt="glyph.chosung"
       />
       <img
@@ -71,7 +81,7 @@ const src = (code: number) => `hangul/${code}.svg`;
         class="glyph jung"
         :class="{ hidebox: hidden.jung }"
         :src="src(glyph.jungCode)"
-        :style="{ height: `${profile.jung.height}px`, top: `${profile.jung.top}px` }"
+        :style="{ height: px(profile.jung.height), top: px(profile.jung.top) }"
         :alt="glyph.jungsung"
       />
       <img
@@ -79,7 +89,7 @@ const src = (code: number) => `hangul/${code}.svg`;
         class="glyph jong"
         :class="{ hidebox: hidden.jong }"
         :src="src(glyph.jongCode)"
-        :style="{ height: `${profile.jong.height}px`, top: `${profile.jong.top}px` }"
+        :style="{ height: px(profile.jong.height), top: px(profile.jong.top) }"
         :alt="glyph.jongsung"
       />
     </template>

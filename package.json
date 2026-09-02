@@ -8,7 +8,7 @@
     "frontend"
   ],
   "scripts": {
-    "test": "npm run test --workspace @chominjungum/hangul-core",
+    "test": "npm run test --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "build": "npm run build --workspace chominjungum-frontend",
     "dev": "npm run dev --workspace chominjungum-frontend",
