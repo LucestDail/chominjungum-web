@@ -116,6 +116,129 @@ describe('자모 가리기 상태', () => {
   });
 });
 
+describe('드래그 정렬 (moveItemTo)', () => {
+  function threeItems() {
+    const ws = useWorksheet();
+    ws.addItem('하나');
+    ws.addItem('두울');
+    ws.addItem('세엣');
+    return ws;
+  }
+
+  it('맨 뒤로 옮긴다', () => {
+    const ws = threeItems();
+    const first = ws.state.value.items[0]!.id;
+    expect(ws.moveItemTo(first, 2)).toBe(true);
+    expect(ws.state.value.items.map((i) => i.text)).toEqual(['두울', '세엣', '하나']);
+  });
+
+  it('맨 앞으로 옮긴다', () => {
+    const ws = threeItems();
+    const last = ws.state.value.items[2]!.id;
+    expect(ws.moveItemTo(last, 0)).toBe(true);
+    expect(ws.state.value.items.map((i) => i.text)).toEqual(['세엣', '하나', '두울']);
+  });
+
+  it('제자리·범위 밖은 무시한다', () => {
+    const ws = threeItems();
+    const first = ws.state.value.items[0]!.id;
+    expect(ws.moveItemTo(first, 0)).toBe(false);
+    expect(ws.moveItemTo(first, 3)).toBe(false);
+    expect(ws.moveItemTo(first, -1)).toBe(false);
+    expect(ws.state.value.items.map((i) => i.text)).toEqual(['하나', '두울', '세엣']);
+  });
+});
+
+describe('가리기 프리셋', () => {
+  function memoryStorage(): Storage {
+    const map = new Map<string, string>();
+    return {
+      get length() {
+        return map.size;
+      },
+      clear: () => map.clear(),
+      getItem: (k: string) => map.get(k) ?? null,
+      key: (i: number) => [...map.keys()][i] ?? null,
+      removeItem: (k: string) => void map.delete(k),
+      setItem: (k: string, v: string) => void map.set(k, v),
+    } as Storage;
+  }
+
+  it('현재 설정을 이름 붙여 저장하고 다시 적용한다', () => {
+    const storage = memoryStorage();
+    const ws = useWorksheet();
+    ws.setHideMode('jong');
+    ws.toggleJamo('4520', true);
+    ws.savePreset('받침 빼기', storage);
+
+    // 설정을 바꿔놓고
+    ws.setHideMode('cho');
+    expect(ws.state.value.hideRule.codes).toEqual([]);
+
+    // 프리셋으로 되돌린다
+    const preset = ws.presets.value[0]!;
+    expect(preset.name).toBe('받침 빼기');
+    expect(ws.applyPreset(preset.id)).toBe(true);
+    expect(ws.state.value.hideRule).toEqual({ mode: 'jong', codes: [4520] });
+  });
+
+  it('저장한 프리셋은 다른 세션에서도 불러온다', () => {
+    const storage = memoryStorage();
+    const a = useWorksheet();
+    a.setHideMode('ja');
+    a.toggleJamo('4352_4520', true);
+    a.savePreset('ㄱ 가리기', storage);
+
+    const b = useWorksheet();
+    b.loadPresets(storage);
+    expect(b.presets.value).toHaveLength(1);
+    expect(b.presets.value[0]!.rule.codes).toEqual([4352, 4520]);
+  });
+
+  it('같은 이름은 덮어쓴다', () => {
+    const storage = memoryStorage();
+    const ws = useWorksheet();
+    ws.setHideMode('cho');
+    ws.toggleJamo('4352', true);
+    ws.savePreset('내 설정', storage);
+
+    ws.toggleJamo('4354', true);
+    ws.savePreset('내 설정', storage);
+
+    expect(ws.presets.value).toHaveLength(1);
+    expect(ws.presets.value[0]!.rule.codes).toEqual([4352, 4354]);
+  });
+
+  it('프리셋은 스냅샷이라 이후 변경에 영향받지 않는다', () => {
+    const storage = memoryStorage();
+    const ws = useWorksheet();
+    ws.setHideMode('cho');
+    ws.toggleJamo('4352', true);
+    const saved = ws.savePreset('스냅샷', storage)!;
+
+    ws.toggleJamo('4354', true); // 저장 후 추가 변경
+    expect(saved.rule.codes).toEqual([4352]);
+  });
+
+  it('빈 이름은 저장하지 않는다', () => {
+    const ws = useWorksheet();
+    expect(ws.savePreset('   ', memoryStorage())).toBeNull();
+    expect(ws.presets.value).toHaveLength(0);
+  });
+
+  it('삭제', () => {
+    const storage = memoryStorage();
+    const ws = useWorksheet();
+    ws.savePreset('지울 것', storage);
+    ws.removePreset(ws.presets.value[0]!.id, storage);
+    expect(ws.presets.value).toHaveLength(0);
+
+    const b = useWorksheet();
+    b.loadPresets(storage);
+    expect(b.presets.value).toHaveLength(0);
+  });
+});
+
 describe('저장·복원', () => {
   function memoryStorage(): Storage {
     const map = new Map<string, string>();

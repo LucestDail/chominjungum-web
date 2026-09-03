@@ -41,8 +41,25 @@ const assignments = ref<AssignmentSummary[]>([]);
 const classroomName = ref('');
 const studentName = ref('');
 const itemText = ref('');
+const itemGrade = ref<string>('');
+const itemUnit = ref('');
+const itemQuery = ref('');
+const bulkRoster = ref('');
+const showBulk = ref(false);
 const assignmentTitle = ref('');
 const selectedItemIds = ref<string[]>([]);
+
+/** 문항 검색 — 문장·단원·학년 어디든 걸리면 보여준다. */
+const filteredItems = computed(() => {
+  const q = itemQuery.value.trim().toLowerCase();
+  if (!q) return items.value;
+  return items.value.filter((i) =>
+    [i.expectedText, i.unit ?? '', i.grade == null ? '' : `${i.grade}학년`]
+      .join(' ')
+      .toLowerCase()
+      .includes(q),
+  );
+});
 
 const selectedClassroom = computed(() =>
   classrooms.value.find((c) => c.id === selectedClassroomId.value) ?? null,
@@ -149,12 +166,60 @@ async function addStudent() {
 
 async function addItem() {
   if (!itemText.value.trim()) return;
-  const item = await guard(() => api.post<Item>('/api/items', { expectedText: itemText.value.trim() }));
+  const item = await guard(() =>
+    api.post<Item>('/api/items', {
+      expectedText: itemText.value.trim(),
+      grade: itemGrade.value ? Number(itemGrade.value) : null,
+      unit: itemUnit.value.trim() || null,
+    }),
+  );
   if (!item) return;
   itemText.value = '';
   notify('ok', '문항을 등록했습니다.');
+  await reloadItems();
+}
+
+async function reloadItems() {
   const itemList = await guard(() => api.get<Item[]>('/api/items'));
   if (itemList) items.value = itemList;
+}
+
+/**
+ * 명단 일괄 입력 — 엑셀에서 복사해 붙여넣는 흐름.
+ * 한 줄에 한 명, "번호<탭>이름" 이나 이름만 있어도 받는다.
+ */
+async function addBulkRoster() {
+  if (!selectedClassroomId.value) return;
+  const lines = bulkRoster.value
+    .split('\n')
+    .map((l) => l.trim())
+    .filter(Boolean);
+  if (lines.length === 0) {
+    notify('warn', '붙여넣은 명단이 비어 있습니다.');
+    return;
+  }
+
+  let added = 0;
+  for (const line of lines) {
+    const cells = line.split(/[\t,]/).map((c) => c.trim());
+    const maybeNo = Number(cells[0]);
+    const hasNo = cells.length > 1 && Number.isFinite(maybeNo);
+    const displayName = (hasNo ? cells.slice(1).join(' ') : cells.join(' ')).trim();
+    if (!displayName) continue;
+
+    const created = await guard(() =>
+      api.post<Student>(`/api/classrooms/${selectedClassroomId.value}/students`, {
+        displayName,
+        studentNo: hasNo ? maybeNo : null,
+      }),
+    );
+    if (created) added += 1;
+  }
+
+  bulkRoster.value = '';
+  showBulk.value = false;
+  notify('ok', `${added}명을 명단에 추가했습니다.`);
+  await selectClassroom(selectedClassroomId.value);
 }
 
 async function createAssignment() {
@@ -247,6 +312,19 @@ onMounted(() => {
           <div class="row">
             <input v-model="studentName" placeholder="예: 3번 김OO" @keyup.enter="addStudent" />
             <button @click="addStudent">추가</button>
+            <button @click="showBulk = !showBulk">{{ showBulk ? '닫기' : '여러 명 붙여넣기' }}</button>
+          </div>
+
+          <div v-if="showBulk" class="bulk">
+            <p class="hint">
+              엑셀에서 복사해 붙여넣으세요. 한 줄에 한 명, <code>번호[탭]이름</code> 또는 이름만.
+            </p>
+            <textarea
+              v-model="bulkRoster"
+              rows="5"
+              placeholder="1&#9;김OO&#10;2&#9;이OO&#10;3&#9;박OO"
+            ></textarea>
+            <button class="primary" @click="addBulkRoster">명단에 추가</button>
           </div>
           <ul class="list">
             <li v-for="s in roster" :key="s.id">{{ s.displayName }}</li>
@@ -278,20 +356,32 @@ onMounted(() => {
           <h2>문항 ({{ items.length }})</h2>
           <div class="row">
             <input v-model="itemText" placeholder="예: 안녕하세요" @keyup.enter="addItem" />
+            <input v-model="itemGrade" class="narrow" type="number" min="1" max="6" placeholder="학년" />
+            <input v-model="itemUnit" class="narrow-wide" placeholder="단원 (선택)" />
             <button @click="addItem">문항 등록</button>
           </div>
+
+          <div class="row">
+            <input v-model="itemQuery" placeholder="문항 검색 (문장·단원·학년)" />
+            <span class="dim search-count">{{ filteredItems.length }}/{{ items.length }}</span>
+          </div>
+
           <ul class="list">
-            <li v-for="item in items" :key="item.id">
+            <li v-for="item in filteredItems" :key="item.id">
               <label>
                 <input
                   type="checkbox"
                   :checked="selectedItemIds.includes(item.id)"
                   @change="toggleItemSelection(item.id)"
                 />
-                {{ item.expectedText }} <span class="dim">({{ item.glyphCount }}칸)</span>
+                {{ item.expectedText }}
+                <span class="dim">({{ item.glyphCount }}칸)</span>
+                <span v-if="item.grade" class="tag">{{ item.grade }}학년</span>
+                <span v-if="item.unit" class="tag">{{ item.unit }}</span>
               </label>
             </li>
             <li v-if="items.length === 0" class="empty">등록된 문항이 없습니다.</li>
+            <li v-else-if="filteredItems.length === 0" class="empty">검색 결과가 없습니다.</li>
           </ul>
         </section>
 
@@ -327,15 +417,61 @@ onMounted(() => {
   margin: 0 auto;
   padding: 24px 20px 60px;
   font-family: system-ui, -apple-system, sans-serif;
-  color: #0f172a;
+  color: var(--text);
 }
 
 .card {
   margin-bottom: 20px;
   padding: 20px;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-sunken);
+}
+
+.bulk {
+  margin-bottom: 12px;
+  padding: 12px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+}
+
+.bulk textarea {
+  width: 100%;
+  margin-bottom: 8px;
+  padding: 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  resize: vertical;
+}
+
+.bulk code {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--border);
+  font-size: 12px;
+}
+
+.narrow {
+  flex: 0 0 72px;
+}
+
+.narrow-wide {
+  flex: 0 0 140px;
+}
+
+.search-count {
+  align-self: center;
+}
+
+.tag {
+  margin-left: 6px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--tool-brand-soft);
+  color: var(--tool-brand-deep);
+  font-size: 12px;
 }
 
 .card h2 {
@@ -345,7 +481,7 @@ onMounted(() => {
 
 .hint {
   margin: 0 0 12px;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 13px;
 }
 
@@ -363,8 +499,8 @@ onMounted(() => {
 }
 
 .tabs button.active {
-  border-color: #296429;
-  color: #296429;
+  border-color: var(--tool-brand);
+  color: var(--tool-brand);
   font-weight: 600;
 }
 
@@ -388,14 +524,14 @@ onMounted(() => {
 
 input {
   padding: 8px 11px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--border-strong);
   border-radius: 8px;
   font-size: 15px;
 }
 
 button {
   padding: 8px 13px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--border-strong);
   border-radius: 8px;
   background: #fff;
   font-size: 14px;
@@ -403,8 +539,8 @@ button {
 }
 
 button.primary {
-  border-color: #296429;
-  background: #296429;
+  border-color: var(--tool-brand);
+  background: var(--tool-brand);
   color: #fff;
   font-weight: 600;
 }
@@ -419,8 +555,8 @@ button.primary {
 }
 
 .chips button.active {
-  border-color: #296429;
-  background: #eaf4ea;
+  border-color: var(--tool-brand);
+  background: var(--tool-brand-soft);
   font-weight: 600;
 }
 
@@ -432,7 +568,7 @@ button.primary {
 .join-code strong {
   padding: 2px 8px;
   border-radius: 6px;
-  background: #fbe365;
+  background: var(--sheet-accent);
   font-size: 18px;
   letter-spacing: 2px;
 }
@@ -446,16 +582,16 @@ button.primary {
 
 .list li {
   padding: 5px 0;
-  border-bottom: 1px solid #eef2f7;
+  border-bottom: 1px solid var(--border);
 }
 
 .list li.empty {
-  color: #94a3b8;
+  color: var(--text-faint);
   border: none;
 }
 
 .dim {
-  color: #94a3b8;
+  color: var(--text-faint);
 }
 
 .assignment {
@@ -473,8 +609,8 @@ button.primary {
 }
 
 .assignment .state.open {
-  background: #d1fae5;
-  color: #1b6e32;
+  background: var(--success-soft);
+  color: var(--success);
   font-weight: 600;
 }
 
@@ -484,10 +620,10 @@ button.primary {
 }
 
 .msg.ok {
-  color: #1b6e32;
+  color: var(--success);
 }
 
 .msg.warn {
-  color: #b91c1c;
+  color: var(--danger);
 }
 </style>

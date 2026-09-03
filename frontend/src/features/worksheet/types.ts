@@ -1,4 +1,5 @@
 import type { HangulGlyph, HideRule } from '@chominjungum/hangul-core';
+export type { HideRule };
 
 import type { ProfileKey } from './profiles';
 
@@ -17,6 +18,16 @@ export interface WorksheetState {
   profileKey: ProfileKey;
   /** 글리프 높이(px). jammin `currentFontSize` 와 같은 역할. */
   fontSize: number;
+}
+
+/**
+ * 자주 쓰는 가리기 설정에 이름을 붙여 재사용한다.
+ * ("받침 빼기", "초성만 보여주기" 처럼 교사마다 반복하는 패턴이 있다)
+ */
+export interface HidePreset {
+  id: string;
+  name: string;
+  rule: HideRule;
 }
 
 /** 문항 추가·수정 결과. 실패 사유는 원본 문구를 따른다. */

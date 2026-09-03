@@ -8,9 +8,16 @@ import {
 } from '@chominjungum/hangul-core';
 
 import type { ProfileKey } from './profiles';
-import { REJECT_MESSAGES, type WorksheetItem, type WorksheetOpResult, type WorksheetState } from './types';
+import {
+  REJECT_MESSAGES,
+  type HidePreset,
+  type WorksheetItem,
+  type WorksheetOpResult,
+  type WorksheetState,
+} from './types';
 
 const STORAGE_KEY = 'chominjungum.worksheet.v1';
+const PRESET_KEY = 'chominjungum.hidePresets.v1';
 
 /**
  * jammin 의 줄 수 계산 규칙 (`worksheet-app.js:162`):
@@ -93,8 +100,14 @@ export function useWorksheet(initial?: WorksheetState) {
     const items = state.value.items;
     const index = items.findIndex((i) => i.id === id);
     if (index < 0) return false;
-    const target = index + delta;
-    if (target < 0 || target >= items.length) return false;
+    return moveItemTo(id, index + delta);
+  }
+
+  /** 드래그 정렬용 — 문항을 지정한 자리로 옮긴다. */
+  function moveItemTo(id: string, target: number): boolean {
+    const items = state.value.items;
+    const index = items.findIndex((i) => i.id === id);
+    if (index < 0 || target < 0 || target >= items.length || target === index) return false;
     const [moved] = items.splice(index, 1);
     items.splice(target, 0, moved!);
     return true;
@@ -178,6 +191,53 @@ export function useWorksheet(initial?: WorksheetState) {
     }
   }
 
+  // ── 가리기 프리셋 ─────────────────────────────────────────
+  const presets: Ref<HidePreset[]> = ref([]);
+
+  function loadPresets(storage: Storage): void {
+    try {
+      const raw = storage.getItem(PRESET_KEY);
+      presets.value = raw ? (JSON.parse(raw) as HidePreset[]) : [];
+    } catch {
+      presets.value = [];
+    }
+  }
+
+  function savePresets(storage: Storage): void {
+    try {
+      storage.setItem(PRESET_KEY, JSON.stringify(presets.value));
+    } catch {
+      // 저장 실패해도 현재 화면 동작은 유지된다
+    }
+  }
+
+  /** 지금 가리기 설정을 이름 붙여 저장. 같은 이름이면 덮어쓴다. */
+  function savePreset(name: string, storage: Storage): HidePreset | null {
+    const trimmed = name.trim();
+    if (!trimmed) return null;
+    const rule: HideRule = JSON.parse(JSON.stringify(state.value.hideRule)) as HideRule;
+    const existing = presets.value.find((p) => p.name === trimmed);
+    if (existing) {
+      existing.rule = rule;
+    } else {
+      presets.value.push({ id: nextId(), name: trimmed, rule });
+    }
+    savePresets(storage);
+    return presets.value.find((p) => p.name === trimmed) ?? null;
+  }
+
+  function applyPreset(id: string): boolean {
+    const preset = presets.value.find((p) => p.id === id);
+    if (!preset) return false;
+    state.value.hideRule = JSON.parse(JSON.stringify(preset.rule)) as HideRule;
+    return true;
+  }
+
+  function removePreset(id: string, storage: Storage): void {
+    presets.value = presets.value.filter((p) => p.id !== id);
+    savePresets(storage);
+  }
+
   return {
     state,
     totalRows,
@@ -187,6 +247,12 @@ export function useWorksheet(initial?: WorksheetState) {
     updateItem,
     removeItem,
     moveItem,
+    moveItemTo,
+    presets,
+    loadPresets,
+    savePreset,
+    applyPreset,
+    removePreset,
     setHideMode,
     toggleJamo,
     isJamoChecked,
@@ -199,4 +265,4 @@ export function useWorksheet(initial?: WorksheetState) {
   };
 }
 
-export { STORAGE_KEY };
+export { STORAGE_KEY, PRESET_KEY };

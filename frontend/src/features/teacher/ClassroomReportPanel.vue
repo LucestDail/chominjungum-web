@@ -5,14 +5,18 @@
  * 취약 자모는 학습지 편집기의 가리기 기능과 같은 자모 코드를 쓰므로,
  * "이 학생이 자주 틀리는 자모만 가린 학습지"로 바로 이어진다.
  */
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import {
   api,
   ApiError,
   downloadClassroomCsv,
   type ClassroomReport,
   type StudentReport,
+  type WeakJamo,
 } from '../../api/client';
+import { requestWorksheet } from '../worksheet/handoff';
+
+import ScoreTrendChart from './ScoreTrendChart.vue';
 
 const props = defineProps<{ classroomId: string }>();
 
@@ -42,6 +46,31 @@ async function openStudent(studentId: string) {
   } catch (e) {
     error.value = e instanceof ApiError ? e.message : String(e);
   }
+}
+
+/** 제출 이력을 회차 순서의 점수 계열로 바꾼다. */
+const trendPoints = computed(() =>
+  (detail.value?.attempts ?? []).map((a, i) => ({
+    label: `${i + 1}회 · ${a.expectedText}`,
+    value: a.scorePercent,
+  })),
+);
+
+/**
+ * 취약 자모만 가린 학습지를 바로 만든다.
+ * 자모 코드가 학습지 가리기와 같은 체계라 규칙을 그대로 넘기면 된다.
+ */
+function makeWorksheet(weak: WeakJamo[]) {
+  if (weak.length === 0) return;
+  const kinds = new Set(weak.map((w) => w.kind));
+  // 초성·종성이 섞이면 자음 모드가 둘을 함께 덮는다
+  const mode: 'ja' | 'cho' | 'jung' | 'jong' =
+    kinds.size > 1 && kinds.has('cho') && kinds.has('jong') ? 'ja' : weak[0]!.kind;
+  const codes = weak.filter((w) => mode === 'ja' || w.kind === mode).map((w) => w.code);
+  requestWorksheet({
+    rule: { mode, codes },
+    note: `${detail.value?.displayName ?? '학생'} 학생이 자주 틀린 자모 ${codes.length}개를 가렸습니다.`,
+  });
 }
 
 async function downloadCsv() {
@@ -125,6 +154,8 @@ watch(() => props.classroomId, load, { immediate: true });
       <div v-if="detail" class="detail">
         <h3>{{ detail.displayName }} — 평균 {{ detail.averagePercent }}점</h3>
 
+        <ScoreTrendChart :points="trendPoints" />
+
         <template v-if="detail.weakJamos.length > 0">
           <p class="dim">자주 틀리는 자모</p>
           <div class="jamos">
@@ -133,6 +164,9 @@ watch(() => props.classroomId, load, { immediate: true });
               <small>{{ KIND_LABEL[w.kind] }} · {{ w.missCount }}회</small>
             </span>
           </div>
+          <button class="make-sheet" @click="makeWorksheet(detail.weakJamos)">
+            이 자모만 가린 학습지 만들기 →
+          </button>
         </template>
         <p v-else class="dim">틀린 자모가 없습니다.</p>
 
@@ -161,9 +195,9 @@ watch(() => props.classroomId, load, { immediate: true });
 .card {
   margin-bottom: 20px;
   padding: 20px;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-sunken);
 }
 
 .head {
@@ -182,14 +216,14 @@ watch(() => props.classroomId, load, { immediate: true });
 h3 {
   margin: 18px 0 6px;
   font-size: 14px;
-  color: #475569;
+  color: var(--text-muted);
 }
 
 button {
   padding: 6px 11px;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  background: #fff;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
   font-size: 13px;
   cursor: pointer;
 }
@@ -206,7 +240,7 @@ button:disabled {
 
 .summary strong {
   font-size: 17px;
-  color: #296429;
+  color: var(--tool-brand);
 }
 
 table {
@@ -219,11 +253,11 @@ th,
 td {
   padding: 6px 8px;
   text-align: left;
-  border-bottom: 1px solid #eef2f7;
+  border-bottom: 1px solid var(--border);
 }
 
 th {
-  color: #64748b;
+  color: var(--text-muted);
   font-weight: 600;
   font-size: 13px;
 }
@@ -233,17 +267,17 @@ tr.clickable {
 }
 
 tr.clickable:hover {
-  background: #eef6ee;
+  background: var(--tool-brand-soft);
 }
 
 td.wrong {
-  color: #b91c1c;
+  color: var(--danger);
 }
 
 .detail {
   margin-top: 20px;
   padding-top: 16px;
-  border-top: 2px solid #e2e8f0;
+  border-top: 2px solid var(--border);
 }
 
 .jamos {
@@ -256,24 +290,31 @@ td.wrong {
 .jamo {
   padding: 6px 10px;
   border: 1px solid #fca5a5;
-  border-radius: 8px;
-  background: #fef2f2;
+  border-radius: var(--radius);
+  background: var(--danger-soft);
   font-size: 18px;
 }
 
 .jamo small {
   margin-left: 6px;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 12px;
 }
 
 .dim {
-  color: #94a3b8;
+  color: var(--text-faint);
   font-size: 13px;
 }
 
+.make-sheet {
+  margin-bottom: 14px;
+  border-color: var(--sheet-accent-deep);
+  background: var(--sheet-accent-soft);
+  font-weight: 600;
+}
+
 .warn {
-  color: #b91c1c;
+  color: var(--danger);
   font-size: 14px;
 }
 </style>

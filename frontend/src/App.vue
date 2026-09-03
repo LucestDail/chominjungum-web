@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 
 import WorksheetEditor from './features/worksheet/WorksheetEditor.vue';
+import { useWorksheetHandoff } from './features/worksheet/handoff';
 import TeacherConsole from './features/teacher/TeacherConsole.vue';
 import StudentExam from './features/student/StudentExam.vue';
 
@@ -14,6 +15,12 @@ const TABS: { key: Tab; label: string; hint: string }[] = [
 ];
 
 const tab = ref<Tab>('worksheet');
+
+// 리포트에서 "이 자모만 가린 학습지 만들기" 를 누르면 학습지 탭으로 넘어온다
+const { tabRequest } = useWorksheetHandoff();
+watch(tabRequest, () => {
+  tab.value = 'worksheet';
+});
 </script>
 
 <template>

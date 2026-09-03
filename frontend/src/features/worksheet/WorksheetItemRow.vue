@@ -3,7 +3,7 @@
  * 학습지 한 문항 — 번호 + 8글자마다 줄바꿈된 칸들 + 편집 툴바.
  * 줄바꿈 기준(8자)은 jammin `profiles.js` 의 `lineBreakCount` 를 따른다.
  */
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { PROFILES, type ProfileKey } from './profiles';
 import type { HideRule } from '@chominjungum/hangul-core';
 
@@ -20,15 +20,30 @@ const props = withDefaults(
     editable?: boolean;
     isFirst?: boolean;
     isLast?: boolean;
+    /** 드래그로 이 자리에 놓으려는 중 */
+    dropTarget?: boolean;
   }>(),
-  { profileKey: 'editor', scale: 1, editable: true, isFirst: false, isLast: false },
+  {
+    profileKey: 'editor',
+    scale: 1,
+    editable: true,
+    isFirst: false,
+    isLast: false,
+    dropTarget: false,
+  },
 );
 
 const emit = defineEmits<{
   (e: 'edit'): void;
   (e: 'remove'): void;
   (e: 'move', delta: -1 | 1): void;
+  (e: 'drag-start'): void;
+  (e: 'drag-over'): void;
+  (e: 'drop'): void;
+  (e: 'drag-end'): void;
 }>();
+
+const dragging = ref(false);
 
 const lines = computed(() => {
   const per = PROFILES[props.profileKey].lineBreakCount;
@@ -38,11 +53,30 @@ const lines = computed(() => {
   }
   return out;
 });
+
+function onDragStart() {
+  dragging.value = true;
+  emit('drag-start');
+}
+
+function onDragEnd() {
+  dragging.value = false;
+  emit('drag-end');
+}
 </script>
 
 <template>
-  <article class="worksheet-item">
+  <article
+    class="worksheet-item"
+    :class="{ dragging, 'drop-target': dropTarget }"
+    :draggable="editable"
+    @dragstart="onDragStart"
+    @dragover.prevent="emit('drag-over')"
+    @drop.prevent="emit('drop')"
+    @dragend="onDragEnd"
+  >
     <header>
+      <span v-if="editable" class="grip" title="끌어서 순서 바꾸기">⠿</span>
       <span class="no">{{ index + 1 }}.</span>
       <span class="text">{{ item.text }}</span>
       <span class="count">{{ item.glyphs.length }}칸</span>
@@ -76,6 +110,19 @@ const lines = computed(() => {
   break-inside: avoid;
   page-break-inside: avoid;
   margin-bottom: 18px;
+  padding: 4px;
+  border-radius: var(--radius);
+  transition: background 0.12s, opacity 0.12s;
+}
+
+.worksheet-item.dragging {
+  opacity: 0.45;
+}
+
+.worksheet-item.drop-target {
+  background: var(--sheet-accent-soft);
+  outline: 2px dashed var(--sheet-accent-deep);
+  outline-offset: -2px;
 }
 
 header {
@@ -86,16 +133,26 @@ header {
   font-size: 15px;
 }
 
+.grip {
+  color: var(--text-faint);
+  cursor: grab;
+  user-select: none;
+  font-size: 14px;
+}
+
+.no,
+.text {
+  font-family: var(--font-hand);
+  font-size: 18px;
+  color: var(--sheet-ink);
+}
+
 .no {
   font-weight: 700;
 }
 
-.text {
-  color: #0f172a;
-}
-
 .count {
-  color: #94a3b8;
+  color: var(--text-faint);
   font-size: 13px;
 }
 
@@ -107,9 +164,9 @@ header {
 
 .tools button {
   padding: 3px 8px;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  background: #fff;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
   font-size: 13px;
   cursor: pointer;
 }
@@ -120,7 +177,7 @@ header {
 }
 
 .tools button.danger {
-  color: #b91c1c;
+  color: var(--danger);
   border-color: #fca5a5;
 }
 
@@ -130,8 +187,13 @@ header {
 }
 
 @media print {
-  .tools {
+  .tools,
+  .grip {
     display: none;
+  }
+
+  .worksheet-item {
+    padding: 0;
   }
 }
 </style>

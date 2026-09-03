@@ -1,4 +1,54 @@
-/* 전역 리셋 + 인쇄 규격 */
+/*
+ * 전역 스타일 — 디자인 토큰 이원화 + 인쇄 규격
+ *
+ * 이 앱에는 성격이 다른 두 화면이 있다.
+ *  ① 학습지 = 아이들이 받는 종이 결과물 → jammin 원본 톤 + 도담도담체
+ *  ② 콘솔·성적 = 교사가 오래 들여다보는 작업 도구 → 단색·저채도, 시스템 폰트
+ * 두 톤을 CSS 변수로 분리해 두고, 화면마다 필요한 쪽만 쓴다.
+ */
+
+/* KCC 도담도담체 — OFL (한국저작권위원회, 공유마당). 고지: /fonts/KCCDodamdodam-LICENSE.txt */
+@font-face {
+  font-family: 'KCC Dodamdodam';
+  src: url('/fonts/KCCDodamdodam.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* ── 공통 ─────────────────────────────────────── */
+  --font-ui: system-ui, -apple-system, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  --font-hand: 'KCC Dodamdodam', var(--font-ui);
+
+  --text: #0f172a;
+  --text-muted: #64748b;
+  --text-faint: #94a3b8;
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --surface: #ffffff;
+  --surface-sunken: #f8fafc;
+
+  --danger: #b91c1c;
+  --danger-soft: #fef2f2;
+  --success: #1b6e32;
+  --success-soft: #f0fdf4;
+
+  --radius-sm: 6px;
+  --radius: 8px;
+  --radius-lg: 12px;
+
+  /* ── ① 학습지(인쇄물) — jammin 원본 톤 ─────────── */
+  --sheet-accent: #ffc800; /* jammin 골든 옐로우 */
+  --sheet-accent-deep: #cca000;
+  --sheet-accent-soft: #fff4cc;
+  --sheet-ink: #1f2937;
+
+  /* ── ② 콘솔(작업 도구) — 단색 실무 톤 ──────────── */
+  --tool-brand: #296429; /* jammin brand green = Flutter 앱과 동일 */
+  --tool-brand-deep: #1e4a1e;
+  --tool-brand-soft: #eaf4ea;
+}
 
 * {
   box-sizing: border-box;
@@ -8,17 +58,24 @@ html,
 body {
   margin: 0;
   padding: 0;
-  background: #fff;
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-ui);
 }
 
 img {
   max-width: 100%;
 }
 
+/* 학습지 영역에서만 손글씨체를 쓴다 */
+.sheet-typography {
+  font-family: var(--font-hand);
+}
+
 /*
- * 인쇄: jammin 은 `offset().top / 880` 으로 페이지를 세었는데,
+ * 인쇄: jammin 은 `offset().top / 880` 으로 페이지를 세었는데
  * 브라우저 확대/여백에 따라 어긋난다. A4 규격을 직접 지정하고
- * 문항 단위 break 규칙(WorksheetItemRow)에 맡긴다.
+ * 문항 단위 break 규칙에 맡긴다.
  */
 @page {
   size: A4 portrait;
