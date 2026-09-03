@@ -45,8 +45,12 @@ const emit = defineEmits<{
 
 const dragging = ref(false);
 
+const profile = computed(() => PROFILES[props.profileKey]);
+/** 글자 크기 배율을 칸 크기에 곱한다 — 내부 배치는 비율이라 함께 커진다. */
+const cellSize = computed(() => Math.round(profile.value.cellSize * props.scale));
+
 const lines = computed(() => {
-  const per = PROFILES[props.profileKey].lineBreakCount;
+  const per = profile.value.lineBreakCount;
   const out: WorksheetItem['glyphs'][] = [];
   for (let i = 0; i < props.item.glyphs.length; i += per) {
     out.push(props.item.glyphs.slice(i, i + per));
@@ -90,14 +94,18 @@ function onDragEnd() {
     </header>
 
     <div class="lines">
-      <div v-for="(line, li) in lines" :key="li" class="line">
+      <div
+        v-for="(line, li) in lines"
+        :key="li"
+        class="line"
+        :style="{ gap: `${profile.cellGap}px`, marginBottom: `${profile.rowGap}px` }"
+      >
         <HangulCell
           v-for="(glyph, gi) in line"
           :key="`${li}-${gi}`"
           :glyph="glyph"
-          :profile-key="profileKey"
           :hide-rule="hideRule"
-          :scale="scale"
+          :size="cellSize"
         />
       </div>
     </div>
@@ -184,6 +192,11 @@ header {
 .line {
   display: flex;
   flex-wrap: nowrap;
+  align-items: flex-start;
+}
+
+.line:last-child {
+  margin-bottom: 0 !important;
 }
 
 @media print {

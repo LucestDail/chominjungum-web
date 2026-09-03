@@ -1,30 +1,40 @@
 <script setup lang="ts">
 /**
- * 받아쓰기 한 칸 (jammin `hangulSet`).
- * 배경 원고지 칸 위에 초/중/종성 SVG 를 절대배치하는 원본 구조를 그대로 따른다.
+ * 받아쓰기 한 칸 — 초/중/종성을 고정 비율 위치에 겹친다.
+ *
+ * 자산이 규격화돼 있어(부위마다 캔버스가 하나씩) 배치는 `hangul-metrics.ts` 의
+ * 비율 상수로 완전히 결정된다. **`size` 하나만 바꾸면** 전체가 비례해서 커지고,
+ * 어떤 크기에서도 초/중/종 위치가 서로 어긋나지 않는다.
+ *
+ * 이전에는 부위마다 픽셀 height·top 을 따로 줬는데(jammin 원본 방식),
+ * 그 수치들은 결국 같은 비율을 손으로 계산해 반올림한 값이었다 — metrics 주석 참고.
  */
 import { computed } from 'vue';
 import type { HangulGlyph } from '@chominjungum/hangul-core';
 import { hiddenPartsOf, type HideRule } from '@chominjungum/hangul-core';
 
-import { PROFILES, specialHeight, type ProfileKey } from './profiles';
+import {
+  BACKGROUND,
+  BACKGROUND_SRC,
+  CHO,
+  glyphSrc,
+  JONG,
+  JUNG,
+  placeSpecial,
+  toPercent,
+} from './hangul-metrics';
 
 const props = withDefaults(
   defineProps<{
     glyph: HangulGlyph;
-    profileKey?: ProfileKey;
     hideRule?: HideRule | null;
-    /**
-     * 글자 크기 배율. jammin `syncFontConfig` 는 모든 글리프 높이를 같은 값으로 덮어써
-     * 초/중/종성 비율이 무너졌는데, 여기서는 **프로필 비율을 유지한 채** 확대·축소한다.
-     */
-    scale?: number;
+    /** 한 칸의 변 길이(px). 이 값 하나로 전체가 비례한다. */
+    size?: number;
+    /** 원고지 안내선(빈 칸) 표시 */
+    showGuide?: boolean;
   }>(),
-  { profileKey: 'editor', hideRule: null, scale: 1 },
+  { hideRule: null, size: 92, showGuide: true },
 );
-
-const profile = computed(() => PROFILES[props.profileKey]);
-const px = (v: number) => `${v * props.scale}px`;
 
 const hidden = computed(() =>
   props.hideRule
@@ -32,64 +42,63 @@ const hidden = computed(() =>
     : { cho: false, jung: false, jong: false },
 );
 
-const src = (code: number) => `hangul/${code}.svg`;
+/** 배치는 상수라 한 번만 계산하면 된다. */
+const boxes = {
+  background: toPercent(BACKGROUND),
+  cho: toPercent(CHO),
+  jung: toPercent(JUNG),
+  jong: toPercent(JONG),
+};
+
+const special = computed(() => {
+  if (!props.glyph.specialFlag || props.glyph.specialTypeCode === undefined) return null;
+  return {
+    src: glyphSrc(props.glyph.specialTypeCode),
+    box: toPercent(placeSpecial(props.glyph.specialTypeCode)),
+  };
+});
+
+const cellStyle = computed(() => ({ width: `${props.size}px`, height: `${props.size}px` }));
 </script>
 
 <template>
-  <div
-    class="hangul-set"
-    :style="{
-      width: px(profile.cellWidth),
-      height: px(profile.cellHeight),
-    }"
-  >
+  <div class="hangul-cell" :style="cellStyle">
+    <!-- 원고지 안내선 -->
+    <img v-if="showGuide" class="layer guide" :src="BACKGROUND_SRC" :style="boxes.background" alt="" />
+
+    <!-- 특수문자·숫자: 폭을 상자에 맞추고 높이는 캔버스 비율대로 -->
     <img
-      class="hangul-background"
-      :src="profile.background.src"
-      :style="{
-        height: px(profile.background.height),
-        top: px(profile.background.top),
-        left: px(profile.background.left),
-      }"
-      alt=""
+      v-if="special"
+      class="layer"
+      :src="special.src"
+      :style="special.box"
+      :alt="glyph.specialType"
     />
 
-    <template v-if="glyph.specialFlag">
-      <img
-        class="glyph special"
-        :src="src(glyph.specialTypeCode!)"
-        :style="{
-          height: px(specialHeight(glyph.specialTypeCode!, profile)),
-          top: px(2),
-          left: px(2),
-        }"
-        :alt="glyph.specialType"
-      />
-    </template>
-
+    <!-- 한글: 중성 → 초성 → 종성 순으로 겹친다 -->
     <template v-else>
       <img
-        v-if="glyph.choCode !== undefined"
-        class="glyph cho"
-        :class="{ hidebox: hidden.cho }"
-        :src="src(glyph.choCode)"
-        :style="{ height: px(profile.cho.height), top: px(profile.cho.top), zIndex: profile.cho.zIndex }"
-        :alt="glyph.chosung"
-      />
-      <img
         v-if="glyph.jungCode !== undefined"
-        class="glyph jung"
+        class="layer jung"
         :class="{ hidebox: hidden.jung }"
-        :src="src(glyph.jungCode)"
-        :style="{ height: px(profile.jung.height), top: px(profile.jung.top) }"
+        :src="glyphSrc(glyph.jungCode)"
+        :style="boxes.jung"
         :alt="glyph.jungsung"
       />
       <img
+        v-if="glyph.choCode !== undefined"
+        class="layer cho"
+        :class="{ hidebox: hidden.cho }"
+        :src="glyphSrc(glyph.choCode)"
+        :style="boxes.cho"
+        :alt="glyph.chosung"
+      />
+      <img
         v-if="glyph.jongCode !== undefined"
-        class="glyph jong"
+        class="layer jong"
         :class="{ hidebox: hidden.jong }"
-        :src="src(glyph.jongCode)"
-        :style="{ height: px(profile.jong.height), top: px(profile.jong.top) }"
+        :src="glyphSrc(glyph.jongCode)"
+        :style="boxes.jong"
         :alt="glyph.jongsung"
       />
     </template>
@@ -97,14 +106,15 @@ const src = (code: number) => `hangul/${code}.svg`;
 </template>
 
 <style scoped>
-.hangul-set {
+.hangul-cell {
   position: relative;
   flex: 0 0 auto;
 }
 
-.hangul-background,
-.glyph {
+.layer {
   position: absolute;
+  /* 조각마다 종횡비가 정해져 있으므로 지정한 상자를 그대로 채운다 */
+  display: block;
 }
 
 /* jammin 의 `.hidebox` — 자리를 유지한 채 감춘다(빈칸 학습지) */
