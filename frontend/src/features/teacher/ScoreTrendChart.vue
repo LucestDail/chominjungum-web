@@ -56,6 +56,29 @@ const labeled = computed(() => {
   return new Set([0, cs.length - 1, lowest.index]);
 });
 
+/**
+ * 직접 라벨의 자리 — 축 라벨·플롯 경계와 부딪히지 않게 민다.
+ *
+ * 가운데 정렬로 두면 첫 점 라벨이 y축 눈금(100/50/0) 바로 옆에 붙어 겹쳐 보이고,
+ * 마지막 점 라벨은 오른쪽으로 삐져나간다. 양 끝은 플롯 안쪽을 향하게 한다.
+ */
+function labelAnchor(index: number): 'start' | 'middle' | 'end' {
+  if (index === 0) return 'start';
+  if (index === coords.value.length - 1) return 'end';
+  return 'middle';
+}
+
+function labelX(c: { x: number; index: number }): number {
+  if (c.index === 0) return c.x + 5;
+  if (c.index === coords.value.length - 1) return c.x - 5;
+  return c.x;
+}
+
+/** 점이 위쪽 끝에 붙으면 라벨을 점 아래로 내린다(위로 잘리는 것을 막는다). */
+function labelY(c: { y: number }): number {
+  return c.y - 9 < PAD.top ? c.y + 13 : c.y - 9;
+}
+
 const average = computed(() =>
   props.points.length === 0
     ? 0
@@ -90,8 +113,9 @@ const average = computed(() =>
         <text
           v-for="c in coords.filter((c) => labeled.has(c.index))"
           :key="`l-${c.index}`"
-          :x="c.x"
-          :y="c.y - 9"
+          :x="labelX(c)"
+          :y="labelY(c)"
+          :text-anchor="labelAnchor(c.index)"
         >
           {{ c.value }}
         </text>
@@ -154,6 +178,5 @@ svg {
   fill: var(--text-muted);
   font-size: 10px;
   font-weight: 600;
-  text-anchor: middle;
 }
 </style>

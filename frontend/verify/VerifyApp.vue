@@ -14,6 +14,8 @@ import { BOX, CANVAS, CHO, JONG, JUNG, toPercent } from '../src/features/workshe
 import { PROFILES as JAMMIN } from './jammin-ref/profiles.js';
 import JamminCell from './JamminCell.vue';
 import JamminSheet from './JamminSheet.vue';
+import ServerScreens from './ServerScreens.vue';
+import ScoreTrendChart from '../src/features/teacher/ScoreTrendChart.vue';
 
 /** 원본 editor 프로필의 자모 상자 크기(역산값). 겹침 대조는 이 크기로 맞춘다. */
 const REF_BOX = 93;
@@ -68,6 +70,16 @@ const sentenceItem2 = computed(() => ({
   glyphs: glyphs(SENTENCE2),
 }));
 
+/** 점수 추이 차트 — 라벨이 축·경계와 부딪히기 쉬운 경우들 */
+const CHART_CASES: { name: string; points: { label: string; value: number }[] }[] = [
+  { name: '보통 등락', points: [86, 82, 90, 88, 75].map((v, i) => ({ label: `${i + 1}회`, value: v })) },
+  { name: '첫 회가 만점 (위쪽 끝)', points: [100, 92, 88, 96, 100].map((v, i) => ({ label: `${i + 1}회`, value: v })) },
+  { name: '전부 만점', points: [100, 100, 100].map((v, i) => ({ label: `${i + 1}회`, value: v })) },
+  { name: '전부 0점 (아래쪽 끝)', points: [0, 0, 0, 0].map((v, i) => ({ label: `${i + 1}회`, value: v })) },
+  { name: '1회만', points: [72].map((v, i) => ({ label: `${i + 1}회`, value: v })) },
+  { name: '많은 회차', points: [60, 72, 55, 80, 68, 90, 74, 88, 95, 100].map((v, i) => ({ label: `${i + 1}회`, value: v })) },
+];
+
 /** 학습지 전체 대조용 문장 — 받침·특수문자·숫자를 모두 포함시킨다 */
 const COMPARE_SENTENCES = ['학교에 갔다.', '값이 5개, 없다?', '읽고 썼다!'];
 
@@ -86,6 +98,15 @@ function shows(section: string): boolean {
   return !only || only.toUpperCase().includes(section);
 }
 if (params.has('guide')) overlayGuide.value = true;
+
+/** 서버 화면(H) 은 로그인 정보가 URL 로 올 때만 띄운다 */
+const serverArgs = {
+  email: params.get('email') ?? undefined,
+  pw: params.get('pw') ?? undefined,
+  join: params.get('join') ?? undefined,
+  name: params.get('name') ?? undefined,
+  openStudent: params.has('student'),
+};
 </script>
 
 <template>
@@ -264,6 +285,27 @@ if (params.has('guide')) overlayGuide.value = true;
           :editable="false"
         />
       </div>
+    </section>
+
+    <!-- I. 점수 추이 차트 -->
+    <section v-if="shows('I')" class="no-print">
+      <h2>I. 점수 추이 차트 — 라벨이 겹치지 않는가</h2>
+      <p class="note">
+        y축 눈금(100/50/0)과 직접 라벨이 부딪히기 쉬운 경우들. 숫자가 서로 겹치거나
+        플롯 밖으로 잘려 나가면 안 된다.
+      </p>
+      <div class="charts">
+        <figure v-for="c in CHART_CASES" :key="c.name" class="chart-case">
+          <figcaption>{{ c.name }}</figcaption>
+          <ScoreTrendChart :points="c.points" />
+        </figure>
+      </div>
+    </section>
+
+    <!-- H. 서버 화면 -->
+    <section v-if="shows('H')" class="no-print">
+      <h2>H. 서버가 필요한 화면</h2>
+      <ServerScreens v-bind="serverArgs" />
     </section>
 
     <!-- F. 수치 요약 -->
@@ -493,6 +535,28 @@ code {
   font-family: var(--font-hand), system-ui, sans-serif;
   font-size: 24px;
   color: #1e293b;
+}
+
+/* --- 차트 케이스 --- */
+.charts {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 18px;
+  max-width: 1000px;
+}
+
+.chart-case {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.chart-case > figcaption {
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
 }
 
 /* --- 학습지 전체 대조 --- */
