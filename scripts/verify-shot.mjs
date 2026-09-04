@@ -5,6 +5,11 @@
  *   npm run verify:shot    # frontend/verify/out/ 에 png + 인쇄 pdf
  *
  * 시스템 Chrome 을 쓴다(별도 의존성 없음).
+ *
+ * 서버가 필요한 화면(교사 콘솔·학생 응시)은 계정이 있어야 하므로 여기 목록에 없다.
+ * 필요하면 직접:
+ *   /verify.html?only=H&student&email=...&pw=...
+ *   /verify.html?only=H&join=<참여코드>&name=<이름>&play=<쓸 답>
  */
 import { execFileSync } from 'node:child_process';
 import { mkdirSync } from 'node:fs';
@@ -25,6 +30,7 @@ const SHOTS = [
   ['special.png', '?only=B&zoom=1.6', '1150,1400'],
   ['sizes.png', '?only=C&zoom=1.6', '1200,700'],
   ['sheet-compare.png', '?only=G', '1250,1500'],
+  ['charts.png', '?only=I&zoom=1.5', '1100,900'],
 ];
 
 const common = [

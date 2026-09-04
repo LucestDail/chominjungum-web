@@ -24,7 +24,25 @@ const props = defineProps<{
   name?: string;
   /** 학생 상세(점수 추이·취약 자모)는 행을 눌러야 열린다 — 스크린샷용으로 대신 눌러준다 */
   openStudent?: boolean;
+  /** 학생 화면에서 큰 글씨를 켜고 답을 써서 제출한 상태까지 만든다 */
+  play?: string;
 }>();
+
+/** 요소가 나타날 때까지 기다린다(데이터가 도착해야 그려지는 것들) */
+async function waitFor<T extends Element>(selector: string, tries = 40): Promise<T | null> {
+  for (let i = 0; i < tries; i++) {
+    const el = document.querySelector<T>(selector);
+    if (el) return el;
+    await new Promise((r) => setTimeout(r, 100));
+  }
+  return null;
+}
+
+/** v-model 에 값을 넣으려면 Vue 가 듣는 input 이벤트를 함께 보내야 한다 */
+function typeInto(el: HTMLInputElement, text: string) {
+  el.value = text;
+  el.dispatchEvent(new Event('input', { bubbles: true }));
+}
 
 const status = ref('로그인 중…');
 const ready = ref<'teacher' | 'student' | null>(null);
@@ -53,13 +71,20 @@ onMounted(async () => {
 
     if (props.openStudent) {
       // 데이터가 도착한 뒤에야 행이 생긴다 — 나타날 때까지 잠깐 기다린다
-      for (let i = 0; i < 40; i++) {
-        const row = document.querySelector<HTMLElement>('tr.clickable');
-        if (row) {
-          row.click();
-          break;
-        }
-        await new Promise((r) => setTimeout(r, 100));
+      const row = await waitFor<HTMLElement>('tr.clickable');
+      row?.click();
+    }
+
+    if (props.play) {
+      // 큰 글씨 → 답 입력 → 제출. 채점 결과가 보이는 상태까지 만든다.
+      const input = await waitFor<HTMLInputElement>('.answer-input');
+      if (input) {
+        const buttons = Array.from(document.querySelectorAll('button'));
+        buttons.find((b) => b.textContent?.includes('글씨'))?.click();
+        typeInto(input, props.play);
+        await new Promise((r) => setTimeout(r, 50));
+        buttons.find((b) => b.textContent?.trim() === '제출')?.click();
+        await waitFor('.result');
       }
     }
   } catch (e) {

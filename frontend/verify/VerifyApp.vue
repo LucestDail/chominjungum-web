@@ -106,6 +106,7 @@ const serverArgs = {
   join: params.get('join') ?? undefined,
   name: params.get('name') ?? undefined,
   openStudent: params.has('student'),
+  play: params.get('play') ?? undefined,
 };
 </script>
 
