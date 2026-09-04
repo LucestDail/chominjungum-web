@@ -201,7 +201,9 @@ header {
 
 @media print {
   .tools,
-  .grip {
+  .grip,
+  /* 칸 수는 편집할 때 보는 값이다 — 종이에는 남기지 않는다 */
+  .count {
     display: none;
   }
 

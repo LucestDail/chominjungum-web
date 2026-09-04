@@ -8,7 +8,8 @@
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "vue-tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "verify:shot": "node ../scripts/verify-shot.mjs"
   },
   "dependencies": {
     "@chominjungum/hangul-core": "*",

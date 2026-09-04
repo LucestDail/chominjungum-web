@@ -12,3 +12,6 @@ backend/target/
 
 # Java
 backend/.mvn/
+
+# 시각 검증 산출물(스크린샷·PDF)
+frontend/verify/out/

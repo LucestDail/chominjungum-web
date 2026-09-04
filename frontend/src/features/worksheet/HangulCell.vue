@@ -115,6 +115,11 @@ const cellStyle = computed(() => ({ width: `${props.size}px`, height: `${props.s
   position: absolute;
   /* 조각마다 종횡비가 정해져 있으므로 지정한 상자를 그대로 채운다 */
   display: block;
+  /**
+   * 전역 `img { max-width: 100% }` 를 받지 않는다.
+   * 특수문자는 상자보다 넓게 놓이므로(쉼표·마침표) 그 규칙에 걸리면 잘린다.
+   */
+  max-width: none;
 }
 
 /* jammin 의 `.hidebox` — 자리를 유지한 채 감춘다(빈칸 학습지) */
