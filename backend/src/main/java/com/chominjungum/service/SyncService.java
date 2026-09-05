@@ -90,7 +90,13 @@ public class SyncService {
                 continue;
             }
 
-            boolean alreadyStored = attempts.existsById(a.attemptId());
+            // 중복 판정은 **저장이 쓰는 키와 같아야 한다**(`AttemptService.submit` 은
+            // (세션·기기·문항) 으로 기존 행을 찾는다). attemptId 로 판정하면, 앱이 재채점해
+            // 새 id 를 만든 경우 실제로는 갱신인데 "신규"로 세어 교사가 보는 숫자가 틀린다.
+            boolean alreadyStored = attempts
+                    .findBySessionIdAndDeviceBindingIdAndItemId(
+                            session.getId(), a.deviceBindingId(), item.getId())
+                    .isPresent();
 
             attemptService.submit(
                     session,

@@ -79,7 +79,14 @@ public class AttemptService {
         }
 
         if (existing.isEmpty()) {
-            attempt.setId(attemptId != null ? attemptId : UUID.randomUUID());
+            // 앱이 만든 attemptId 를 그대로 쓰되, **그 id 가 이미 다른 (세션·기기·문항) 으로
+            // 존재하면 쓰지 않는다** — 그대로 save 하면 JPA 가 그 행을 merge 해서
+            // 남의 답안을 이 내용으로 덮어쓴다.
+            UUID id = attemptId;
+            if (id == null || attempts.existsById(id)) {
+                id = UUID.randomUUID();
+            }
+            attempt.setId(id);
         }
         attempt.setSessionId(session.getId());
         attempt.setItemId(item.getId());

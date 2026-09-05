@@ -9,6 +9,7 @@ import com.chominjungum.repo.TeacherRepository;
 import com.chominjungum.web.ApiException;
 import java.security.SecureRandom;
 import java.util.List;
+import java.time.Instant;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,16 +26,19 @@ public class AuthService {
     private final ClassroomRepository classrooms;
     private final StudentRepository students;
     private final PasswordEncoder passwordEncoder;
+    private final LoginThrottle loginThrottle;
 
     public AuthService(
             TeacherRepository teachers,
             ClassroomRepository classrooms,
             StudentRepository students,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            LoginThrottle loginThrottle) {
         this.teachers = teachers;
         this.classrooms = classrooms;
         this.students = students;
         this.passwordEncoder = passwordEncoder;
+        this.loginThrottle = loginThrottle;
     }
 
     @Transactional
@@ -46,11 +50,23 @@ public class AuthService {
     }
 
     public Teacher login(String email, String rawPassword) {
-        Teacher teacher = teachers.findByEmail(email)
-                .orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 올바르지 않습니다."));
-        if (!passwordEncoder.matches(rawPassword, teacher.getPasswordHash())) {
+        Instant now = Instant.now();
+        long blocked = loginThrottle.blockedSeconds(email, now);
+        if (blocked > 0) {
+            // 계정을 잠그지 않는다 — 남의 이메일로 반복 실패시켜 그 교사를 막는 수단이 된다.
+            // 잠시 거부했다가 저절로 풀리게 한다.
+            throw new ApiException(
+                    HttpStatus.TOO_MANY_REQUESTS,
+                    "로그인 시도가 많습니다. " + ((blocked / 60) + 1) + "분 뒤에 다시 시도하세요.");
+        }
+
+        Teacher teacher = teachers.findByEmail(email).orElse(null);
+        if (teacher == null || !passwordEncoder.matches(rawPassword, teacher.getPasswordHash())) {
+            // 계정이 없는 경우와 비밀번호가 틀린 경우를 구분하지 않는다(사용자 열거 방지).
+            loginThrottle.recordFailure(email, now);
             throw new ApiException(HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 올바르지 않습니다.");
         }
+        loginThrottle.recordSuccess(email);
         return teacher;
     }
 

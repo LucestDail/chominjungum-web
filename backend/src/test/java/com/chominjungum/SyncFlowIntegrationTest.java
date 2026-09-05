@@ -109,6 +109,44 @@ class SyncFlowIntegrationTest {
     }
 
     @Test
+    void 재채점해_새_attemptId_로_다시_보내도_신규로_세지_않는다() throws Exception {
+        // 앱은 다시 채점하면 새 attemptId 를 만든다(답이 바뀐 것이므로 새 시도로 본다).
+        // 그때 서버는 같은 (세션·기기·문항) 이라 기존 행을 **갱신**하는데,
+        // 중복 판정을 attemptId 로 하면 "신규"로 세어 교사가 보는 숫자가 틀린다.
+        Fixture f = setup();
+        String sessionId = UUID.randomUUID().toString();
+
+        JsonNode first = postJson("/api/sync/sessions", f.token(),
+                batch(sessionId, f.classroomId(), UUID.randomUUID(), "device-rescore"));
+        JsonNode second = postJson("/api/sync/sessions", f.token(),
+                batch(sessionId, f.classroomId(), UUID.randomUUID(), "device-rescore"));
+
+        assertThat(first.get("accepted").asInt()).isEqualTo(1);
+        assertThat(second.get("accepted").asInt()).isZero();
+        assertThat(second.get("duplicated").asInt()).isEqualTo(1);
+    }
+
+    @Test
+    void 같은_attemptId_로_다른_문항을_보내도_남의_답안을_덮어쓰지_않는다() throws Exception {
+        // attemptId 를 그대로 PK 로 쓰면, 이미 있는 id 로 다른 (세션·기기·문항) 을 보낼 때
+        // JPA 가 그 행을 merge 해서 **다른 답안이 이 내용으로 바뀐다**.
+        Fixture f = setup();
+        UUID shared = UUID.randomUUID();
+
+        postJson("/api/sync/sessions", f.token(),
+                batch(UUID.randomUUID().toString(), f.classroomId(), shared, "device-a"));
+        JsonNode second = postJson("/api/sync/sessions", f.token(),
+                batch(UUID.randomUUID().toString(), f.classroomId(), shared, "device-b"));
+
+        // 기기가 다르므로 새 제출이다 — 덮어쓰기가 아니라 별도 행으로 들어가야 한다
+        assertThat(second.get("accepted").asInt()).isEqualTo(1);
+        assertThat(second.get("duplicated").asInt()).isZero();
+
+        // 덮어썼다면 기존 행을 찾아 duplicated 로 셌을 것이다 — accepted 가 곧 별도 행의 증거다.
+        assertThat(second.get("rejected")).isEmpty();
+    }
+
+    @Test
     void 모르는_문항의_제출은_거부되고_나머지는_저장된다() throws Exception {
         Fixture f = setup();
 
