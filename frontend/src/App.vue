@@ -25,7 +25,9 @@ watch(tabRequest, () => {
 
 <template>
   <nav class="nav">
-    <span class="brand">초민정음</span>
+    <!-- 로고는 jammin 원본을 바이트 그대로 쓴다(임의 재현 금지).
+         출처: jammin/src/main/resources/static/img/navbar-logo.png (sha256 3a1deff1…) -->
+    <img class="brand-logo" src="/navbar-logo.png" alt="초민정음" />
     <button
       v-for="t in TABS"
       :key="t.key"
@@ -48,15 +50,17 @@ watch(tabRequest, () => {
   align-items: center;
   gap: 8px;
   padding: 10px 20px;
-  border-bottom: 1px solid #e2e8f0;
-  background: #fff;
+  /* jammin 원본 네비와 같은 초록 바 — 로고가 흰색이라 밝은 배경에서는 보이지 않는다.
+     본문(콘솔·성적표)은 종전대로 단색 실무 톤을 유지한다. 이원화는 "학습지 vs 콘솔
+     본문"이지 상단 브랜드바가 아니다. 앱도 초록 앱바 + 같은 로고라 셋이 일치한다. */
+  background: #296429;
   font-family: system-ui, -apple-system, sans-serif;
 }
 
-.brand {
-  margin-right: 8px;
-  font-weight: 700;
-  color: #296429;
+.brand-logo {
+  height: 26px;
+  margin-right: 10px;
+  display: block;
 }
 
 .nav button {
@@ -64,14 +68,19 @@ watch(tabRequest, () => {
   border: 1px solid transparent;
   border-radius: 8px;
   background: none;
+  color: rgba(255, 255, 255, 0.86);
   font-size: 14px;
   cursor: pointer;
 }
 
+.nav button:hover {
+  color: #fff;
+}
+
 .nav button.active {
-  border-color: #296429;
-  background: #eaf4ea;
-  color: #1e4a1e;
+  border-color: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
   font-weight: 600;
 }
 
