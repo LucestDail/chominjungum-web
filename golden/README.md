@@ -10,6 +10,24 @@
 
 하나라도 어긋나면 교실 모드와 웹 모드의 채점 결과가 달라진다. `hangul-split.json`이 셋을 묶는 단일 기준이다.
 
+## 골든이 **아직 유효한지** 확인 (2026-09-10 신설)
+
+이 파일은 채집한 **스냅샷**이다. 세 이식본이 이 파일과 맞는지는 각 저장소 테스트가
+보지만, **파일 자체가 jammin 과 어긋나면 셋이 사이좋게 같이 틀린다.**
+
+```bash
+cd ../../jammin
+java -jar target/jammin-0.0.1-SNAPSHOT.jar --server.port=8089 --server.ssl.enabled=false
+node golden/verify-against-jammin.mjs      # 0 일치 · 1 불일치 · 2 검사 못 함
+```
+
+**2026-09-10 실측: 22/22 일치** (빈 문자열 케이스 포함 전수).
+
+⚠️**context path 가 `/chominjungum` 이다**(`application.properties`). `/addWord` 로
+바로 치면 404 가 나고, 그걸 "서버가 안 떴다"로 오해하기 쉽다 — 실제로 그랬다.
+⚠️jar 로 띄우면 `target/` 만 쓰고 그건 gitignore 대상이라 **jammin 형상은 안 변한다**
+(실행 후 `git status` 로 확인했다).
+
 ## 채집 방법 (jammin은 읽기 전용으로만 사용)
 
 ```bash
