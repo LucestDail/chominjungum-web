@@ -88,8 +88,8 @@ cd backend && mvn test                     # 49 tests (골든·채점·통합 e2
 ### 전체 테스트
 
 ```bash
-npm test                                   # TS 69 (hangul-core 55 + frontend 14)
-cd backend && mvn test                     # Java 49
+npm test                                   # TS 103 (hangul-core-ts 55 + frontend 48)
+cd backend && mvn test                     # Java 66 (docker compose 로 DB 먼저 띄울 것)
 cd ../../chominjungum && \
   (cd packages/hangul_core && dart test) && \
   (cd packages/sync_protocol && dart test) && \
